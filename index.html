@@ -2,9 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Everlasting Countdown</title>
+    <!-- Google Fonts for a clean, modern look -->
+    <!-- Noto Sans JP for general text, Inter for heading, Roboto Mono for numbers -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Noto+Sans+JP:wght@300;400;700&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8f8f8; /* Light, natural background */
+            --text-color: #333;
+            --accent-color: #a8dadc; /* Subtle accent color */
+            --shadow-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif; /* Default font for labels and general text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+        .countdown-container {
+            text-align: center;
+            padding: 20px;
+            max-width: 90%;
+        }
+        h1 {
+            font-family: 'Inter', sans-serif; /* New minimalist font for heading */
+            margin-bottom: 40px;
+            font-size: 2.8rem;
+            color: var(--text-color);
+            letter-spacing: 1px;
+            font-weight: 300; /* Thinner weight for heading */
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .countdown {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            min-width: 100px;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        .time-box span {
+            font-family: 'Roboto Mono', monospace; /* New thinner minimalist font for numbers */
+            font-size: 4.5rem;
+            font-weight: 300; /* Thinner weight for numbers */
+            color: var(--accent-color);
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+        .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 30px;
+            }
+            .countdown {
+                gap: 20px;
+            }
+            .time-box {
+                min-width: 80px;
+            }
+            .time-box span {
+                font-size: 3.5rem;
+            }
+            .label {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
 </head>
 <body>
+
+<div class="countdown-container">
+    <h1>Everlasting Moment</h1>
+    <div class="countdown">
+        <div class="time-box">
+            <span id="days">00</span>
+            <div class="label">Days</div>
+        </div>
+        <div class="time-box">
+            <span id="hours">00</span>
+            <div class="label">Hours</div>
+        </div>
+        <div class="time-box">
+            <span id="minutes">00</span>
+            <div class="label">Minutes</div>
+        </div>
+        <div class="time-box">
+            <span id="seconds">00</span>
+            <div class="label">Seconds</div>
+        </div>
+    </div>
+</div>
+
+<!-- GSAP CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    // Set the date we're counting down to (1 month from when this script was first run)
+    // To ensure the countdown persists across page reloads, we store the target date in localStorage
+    let targetDateStr = localStorage.getItem('countdownTargetDate');
+    let targetDate;
+
+    if (!targetDateStr) {
+        targetDate = new Date();
+        targetDate.setMonth(targetDate.getMonth() + 1);
+        localStorage.setItem('countdownTargetDate', targetDate.toISOString());
+    } else {
+        targetDate = new Date(targetDateStr);
+    }
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = targetDate.getTime() - now;
+
+        if (distance < 0) {
+            document.querySelector('.countdown').innerHTML = "<h2>The wait is over!</h2>";
+            clearInterval(countdownInterval);
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("days").innerText = String(days).padStart(2, '0');
+        document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+        document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
+        document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
+    }
+
+    const countdownInterval = setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // GSAP Animations
+    gsap.timeline()
+        .to("body", { overflow: "auto", duration: 0 })
+        .to("h1", { opacity: 1, y: 0, duration: 1, ease: "power3.out" })
+        .fromTo(".time-box",
+            { opacity: 0, scale: 0.9, y: 20 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: "back.out(1.7)", stagger: 0.1 },
+            "-=0.5"
+        );
+
+</script>
 
 </body>
 </html>
